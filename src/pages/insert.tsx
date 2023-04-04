@@ -61,6 +61,7 @@ export default function Insert(){
                             <section className="flex flex-col w-full">
                                 <label htmlFor="genre" className="font-semibold mb-2">Genre</label>
                                 <select name="genre" id="" className={`${montserrat.className} w-full mb-5 border border-black border-opacity-20 rounded-lg px-2 py-1 shadow-md text-[14px] hover:transition hover:border-opacity-80 duration-500 focus:outline-gray-500`}>
+                                    <option value="" disabled hidden>Select a genre</option>
                                     <option value="">Genre 1</option>
                                     <option value="">Genre 2</option>
                                 </select>
@@ -69,6 +70,7 @@ export default function Insert(){
                             <section className="flex flex-col w-full">
                                 <label htmlFor="directors" className="font-semibold mb-2">Movie Director</label>
                                 <select name="directors" id="" className={`${montserrat.className} w-full mb-5 border border-black border-opacity-20 rounded-lg px-2 py-1 shadow-md text-[14px] hover:transition hover:border-opacity-80 duration-500 focus:outline-gray-500`}>
+                                    <option value="" disabled hidden>Select a director</option>
                                     <option value="">Director 1</option>
                                     <option value="">Director 2</option>
                                 </select>
@@ -79,6 +81,7 @@ export default function Insert(){
                             <section className="flex flex-col w-full">
                                 <label htmlFor="genre" className="font-semibold mb-2">First Actor</label>
                                 <select name="genre" id="" className={`${montserrat.className} w-full mb-5 border border-black border-opacity-20 rounded-lg px-2 py-1 shadow-md text-[14px] hover:transition hover:border-opacity-80 duration-500 focus:outline-gray-500`}>
+                                    <option value="" disabled hidden>Select an actor</option>
                                     <option value="">Actor 1</option>
                                     <option value="">Actor 2</option>
                                 </select>
@@ -87,6 +90,7 @@ export default function Insert(){
                             <section className="flex flex-col w-full">
                                 <label htmlFor="directors" className="font-semibold mb-2">Second Actor</label>
                                 <select name="directors" id="" className={`${montserrat.className} w-full mb-5 border border-black border-opacity-20 rounded-lg px-2 py-1 shadow-md text-[14px] hover:transition hover:border-opacity-80 duration-500 focus:outline-gray-500`}>
+                                    <option value="" disabled hidden>Select an actor</option>
                                     <option value="">Actor 1</option>
                                     <option value="">Actor 2</option>
                                 </select>
