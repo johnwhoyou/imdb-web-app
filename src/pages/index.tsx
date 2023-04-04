@@ -1,16 +1,17 @@
-import Head from 'next/head'
-import { Inter } from 'next/font/google'
+import Head from "next/head";
+import { Inter } from "next/font/google";
+import MoviesTable from "@/components/MoviesTable/MoviesTable";
+import SearchMovie from "@/components/SearchMovie/SearchMovie";
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
   return (
     <>
-      <main>
-        <h1 className="text-3xl font-bold underline">
-          Hello world! This is a Next.js app with Mantine and TailwindCSS.
-        </h1>
+      <main className="pt-16">
+        <SearchMovie />
+        <MoviesTable />
       </main>
     </>
-  )
+  );
 }
