@@ -1,7 +1,14 @@
+import { useState } from "react";
 import Image from "next/image";
 
 // TO DO: NavBar Hamburger Button Still Not Implemented
 const NavBar = () => {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen);
+  };
+
   return (
     <nav className="border-gray-200 bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
       <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
@@ -22,7 +29,8 @@ const NavBar = () => {
           type="button"
           className="inline-flex items-center p-2 ml-3 text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
           aria-controls="navbar-solid-bg"
-          aria-expanded="false"
+          aria-expanded={menuOpen}
+          onClick={toggleMenu}
         >
           <span className="sr-only">Open main menu</span>
           <svg
@@ -39,8 +47,13 @@ const NavBar = () => {
             ></path>
           </svg>
         </button>
-        <div className="hidden w-full md:block md:w-auto" id="navbar-solid-bg">
-          <ul className="flex flex-col font-medium mt-4 rounded-lg bg-gray-50 md:flex-row md:space-x-8 md:mt-0 md:border-0 md:bg-transparent dark:bg-gray-800 md:dark:bg-transparent dark:border-gray-700">
+        <div
+          className={`${
+            menuOpen ? "block" : "hidden"
+          } w-full md:block md:w-auto z-10`}
+          id="navbar-solid-bg"
+        >
+          <ul className="flex flex-col font-medium mt-1 rounded-lg bg-gray-50 shadow-lg md:flex-row md:space-x-8 md:mt-0 md:border-0 md:bg-transparent dark:bg-gray-800 md:dark:bg-transparent dark:border-gray-700 absolute right-0 w-full md:w-auto md:static">
             <li>
               <a
                 href="#"
