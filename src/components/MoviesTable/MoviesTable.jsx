@@ -17,7 +17,7 @@ const MoviesTable = () => {
           `/api/movies?page=${currentPage}&limit=${rowsPerPage}&search=${searchQuery}`
         );
         setMovies(response.data.data);
-        setTotalPages(response.data.totalPages);
+        setTotalPages(response.data.pagination.totalPages);
       } catch (error) {
         console.error("Error fetching movies:", error);
       }
