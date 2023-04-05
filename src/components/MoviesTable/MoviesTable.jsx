@@ -154,7 +154,7 @@ const MoviesTable = () => {
                   </button>
                   <button
                     type="button"
-                    className="w-full px-4 py-2 text-base text-indigo-500 bg-white border"
+                    className="w-full px-4 py-2 text-base text-blue-700 bg-white border"
                   >
                     {currentPage}
                   </button>
