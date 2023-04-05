@@ -1,7 +1,7 @@
-import { TextInput, TextInputProps, ActionIcon } from "@mantine/core";
-import { IconSearch, IconArrowRight } from "@tabler/icons-react";
+import { TextInput } from "@mantine/core";
+import { IconSearch } from "@tabler/icons-react";
 
-const SearchMovie = (/*props: TextInputProps*/) => {
+const SearchMovie = ({ onSearchChange }) => {
   return (
     <div className="max-w-xl mx-auto pt-16 px-4">
       <TextInput
@@ -9,14 +9,9 @@ const SearchMovie = (/*props: TextInputProps*/) => {
         radius="xl"
         size="md"
         label="Search Movie Title"
-        rightSection={
-          <ActionIcon size={32} radius="xl" color="indigo-500" variant="light">
-            <IconArrowRight size="1.1rem" stroke={1.5} />
-          </ActionIcon>
-        }
         placeholder="Avengers: Infinity War"
         rightSectionWidth={42}
-        //{...props}
+        onChange={(event) => onSearchChange(event.target.value)} // Call the callback function when input changes
       />
     </div>
   );
