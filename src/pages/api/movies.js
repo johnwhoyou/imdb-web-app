@@ -108,7 +108,31 @@ export default async function handler(req, res) {
 
       // If an id was sent, assume an entry is to be updated
       else{
-        
+        var genres_arr = []
+
+        Movie.findAll({
+          attributes: ['genre'],
+          group: ['genre']
+        }).then((genres) => {
+          genres = genres.filter((val) => {
+            return val.genre != null
+          })
+          genres_arr = genres
+  
+          Movie.findByPk(req.body.id).then((movie) => {
+            if(movie === null)
+              res.status(500).json({ message: "Error movie not found." })
+  
+            else{
+              res.status(201).json({movie: movie, genres: genres_arr})
+            } 
+          }).catch((error) => {
+            res.status(500).json({message: error.message})
+          })
+
+        }).catch((err) => {
+          res.status(500).json({message: "Error Fetching Genres"})
+        })
       }
 
     } catch (error) {
