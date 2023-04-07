@@ -30,7 +30,7 @@ export default function Update_entry({ movie_id }){
 
         const fetchData = () => {
             if(movie_id)
-                axios.post("/api/movies", { id: movie_id }).then((res) => {
+                axios.get(`/api/movies?movie_id=${movie_id}`).then((res) => {
                     setName(res.data.movie.name)
                     setYear(res.data.movie.year)
                     setGenre(res.data.movie.genre)
@@ -38,7 +38,7 @@ export default function Update_entry({ movie_id }){
                     setActor1(res.data.movie.actor1)
                     setActor2(res.data.movie.actor2)
                     setGenres(res.data.genres)
-                    console.log(res.data)
+                    // console.log(res.data)
                 }).catch((error) => {
                     console.log(error)
                 })
@@ -49,8 +49,25 @@ export default function Update_entry({ movie_id }){
     }, [router.isReady])
 
     function saveEdits(){
-
-    }
+        try {
+            axios.post("/api/movies", {
+                id: movie_id,
+                name: name,
+                year: year,
+                genre: genre,
+                director: director,
+                actor1: actor1,
+                actor2: actor2
+            }).then((res) => {
+                console.log(res.data.message)
+                window.location.reload()
+            }).catch((error) => {
+                console.log(error)
+            })
+        } catch (error) {
+            console.log(error)
+        }
+    }   
 
     function deleteEntry(){
 

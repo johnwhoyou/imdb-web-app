@@ -24,6 +24,40 @@ export default async function handler(req, res) {
         res.status(500).json({message: "Error Fetching Genres"})
       })
     }
+
+    // Fetches movie data given a movie_id
+    else if(req.query.movie_id){
+      var genres_arr = []
+      var id = parseInt(req.query.movie_id, 10)
+
+      // Fetch genres options
+      Movie.findAll({
+        attributes: ['genre'],
+        group: ['genre']
+      }).then((genres) => {
+        genres = genres.filter((val) => {
+          return val.genre != null
+        })
+        genres_arr = genres
+        
+        // Fetches movie data, using movie_id
+        Movie.findByPk(id).then((movie) => {
+          if(movie === null)
+            res.status(500).json({ message: "Error movie not found." })
+  
+          else{
+            res.status(201).json({movie: movie, genres: genres_arr})
+          } 
+        }).catch((error) => {
+          res.status(500).json({message: error.message})
+        })
+
+      }).catch((err) => {
+        res.status(500).json({message: "Error Fetching Genres"})
+      })
+    }
+
+    // Else
     else{
       const page = parseInt(req.query.page, 10) || 1;
       const limit = parseInt(req.query.limit, 10) || 10;
@@ -108,35 +142,25 @@ export default async function handler(req, res) {
 
       // If an id was sent, assume an entry is to be updated
       else{
-        var genres_arr = []
-
-        Movie.findAll({
-          attributes: ['genre'],
-          group: ['genre']
-        }).then((genres) => {
-          genres = genres.filter((val) => {
-            return val.genre != null
-          })
-          genres_arr = genres
-  
-          Movie.findByPk(req.body.id).then((movie) => {
-            if(movie === null)
-              res.status(500).json({ message: "Error movie not found." })
-  
-            else{
-              res.status(201).json({movie: movie, genres: genres_arr})
-            } 
-          }).catch((error) => {
-            res.status(500).json({message: error.message})
-          })
-
-        }).catch((err) => {
-          res.status(500).json({message: "Error Fetching Genres"})
+        Movie.update({
+          name: req.body.name,
+          year: req.body.year,
+          genre: req.body.genre,
+          director: req.body.director,
+          actor1: req.body.actor1,
+          actor2: req.body.actor2
+        }, {
+          where: {
+            id: req.body.id
+          }
+        }).then((updated) => {
+            res.status(201).json({message: "Successfully updated"})
+        }).catch((error) => {
+          res.status(500).json({message: error.message})
         })
       }
 
     } catch (error) {
-      console.log(error)
       console.error("Error creating movie:", error);
       res.status(500).json({ message: "Error creating movie." });
     }
