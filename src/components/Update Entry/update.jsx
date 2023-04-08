@@ -30,7 +30,8 @@ export default function Update_entry({ movie_id }){
 
         const fetchData = () => {
             if(movie_id)
-                axios.get(`/api/movies?movie_id=${movie_id}`).then((res) => {
+                axios.get(`/api/movies?movie_id=${movie_id}`)
+                .then((res) => {
                     setName(res.data.movie.name)
                     setYear(res.data.movie.year)
                     setGenre(res.data.movie.genre)
@@ -70,7 +71,20 @@ export default function Update_entry({ movie_id }){
     }   
 
     function deleteEntry(){
+        try {
+            axios.get(`/api/movies?delete=${true}&movie_id=${movie_id}`)
+            .then((res) => {
+                console.log(res)
+                console.log("Deleted Entry")
 
+                router.push("/")
+            }).catch((err) => {
+                console.log(err)
+            })
+            
+        } catch (error) {   
+            console.log(error)
+        }
     }
 
     return (
@@ -131,7 +145,6 @@ export default function Update_entry({ movie_id }){
                     <form action="" className="flex flex-col xl:text-[20px] opacity-100"
                         onSubmit={(e) => {
                             e.preventDefault() 
-                            handleSubmit()
                         } }
                     >
                         <label htmlFor="title" className="font-semibold mb-2">Movie Title</label>

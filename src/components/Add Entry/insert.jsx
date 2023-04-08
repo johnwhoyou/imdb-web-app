@@ -3,6 +3,7 @@ import { Montserrat } from "next/font/google";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useRouter } from "next/router";
 
 const montserrat = Montserrat({
     subsets: ['latin', 'cyrillic', 'cyrillic-ext'],
@@ -19,6 +20,7 @@ export default function Add_Entry(){
     const [ actor2, setActor2 ] = useState("")
 
     const [genres, setGenres] = useState([])
+    const router = useRouter()
 
     useEffect(() => {
 
@@ -52,6 +54,9 @@ export default function Add_Entry(){
         axios.post("/api/movies", data)
         .then((res) => {
             console.log(res.data)
+
+            console.log("Entry Added")
+            router.push("/")
         }).catch((err) => {
             console.log(err)
         })

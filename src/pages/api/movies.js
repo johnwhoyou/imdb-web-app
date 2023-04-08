@@ -26,7 +26,7 @@ export default async function handler(req, res) {
     }
 
     // Fetches movie data given a movie_id
-    else if(req.query.movie_id){
+    else if(req.query.movie_id && !req.query.delete){
       var genres_arr = []
       var id = parseInt(req.query.movie_id, 10)
 
@@ -55,6 +55,35 @@ export default async function handler(req, res) {
       }).catch((err) => {
         res.status(500).json({message: "Error Fetching Genres"})
       })
+    }
+
+    else if(req.query.delete){
+      if(req.query.movie_id){
+
+        const row = await Movie.findOne({
+          where: {
+            id: req.query.movie_id
+          }
+        })
+
+        if(row){
+          Movie.destroy({
+            where: {
+              id: req.query.movie_id
+            }
+          })
+          .then((result) => {
+            res.status(200).json(result)
+          })
+          .catch((error) => {
+            res.status(500).json({message: "Error deleting entry"})
+          })
+        }
+        else{
+          res.status(500).json({message: "Movie Not Found"})
+        }
+      }
+        
     }
 
     // Else
