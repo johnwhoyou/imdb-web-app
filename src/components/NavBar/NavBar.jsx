@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 // TO DO: NavBar Hamburger Button Still Not Implemented
 const NavBar = () => {
@@ -14,7 +15,7 @@ const NavBar = () => {
   return (
     <nav className="border-gray-200 bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
       <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
-        <a href="https://imdb.johnjoyo.dev/" className="flex items-center">
+        <Link href="/search" className="flex items-center">
           <Image
             src="https://cdn-icons-png.flaticon.com/512/5977/5977585.png"
             className="h-8 mr-3"
@@ -25,7 +26,7 @@ const NavBar = () => {
           <span className="self-center font-semibold whitespace-nowrap dark:text-white sm:text-lg sm:font-semibold lg:text-base">
             The Internet Movie Database
           </span>
-        </a>
+        </Link>
         <button
           data-collapse-toggle="navbar-solid-bg"
           type="button"
