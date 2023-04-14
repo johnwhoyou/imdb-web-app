@@ -55,12 +55,6 @@ const MoviesTable = () => {
                       scope="col"
                       className="px-5 py-3 text-sm font-semibold text-left text-gray-800 uppercase bg-white border-b border-gray-200"
                     >
-                      ID
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-5 py-3 text-sm font-semibold text-left text-gray-800 uppercase bg-white border-b border-gray-200"
-                    >
                       TITLE
                     </th>
                     <th
@@ -100,11 +94,6 @@ const MoviesTable = () => {
                   {movies &&
                     movies.map((movie, index) => (
                       <tr key={movie.id} className="relative">
-                        <td className="px-5 py-5 text-sm bg-white border-b border-gray-200">
-                          <p className="text-gray-900 whitespace-no-wrap">
-                            {movie.id}
-                          </p>
-                        </td>
                         <td className="px-5 py-5 text-sm bg-white border-b border-gray-200">
                           <p className="text-gray-900 whitespace-no-wrap">
                             {movie.name ? movie.name : "N/D"}
