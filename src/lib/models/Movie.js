@@ -1,45 +1,48 @@
-const { DataTypes } = require("sequelize");
-import centralNode from "../db";
+import { DataTypes, Model } from "sequelize";
 
-const Movie = centralNode.define("Movie", {
-    // Model attributes are defined here
-    id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
-      primaryKey: true,
-      allowNull: false,
-    },
-    name: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    year: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    genre: {
+class Movie extends Model {}
+
+const initModel = (sequelizeInstance) => {
+  Movie.init(
+    {
+      id: {
+        type: DataTypes.UUID,
+        primaryKey: true,
+        defaultValue: DataTypes.UUIDV4,
+        allowNull: false,
+      },
+      name: {
         type: DataTypes.STRING,
         allowNull: true,
-    },
-    director: {
+      },
+      year: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
+      genre: {
         type: DataTypes.STRING,
         allowNull: true,
-    },
-    actor1: {
+      },
+      director: {
         type: DataTypes.STRING,
         allowNull: true,
-    },
-    actor2: {
+      },
+      actor1: {
         type: DataTypes.STRING,
-        allowNull: true
+        allowNull: true,
+      },
+      actor2: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
     },
-}, {
-    // Other model options go here
-    tableName: "movies",
-    timestamps: false,
-});
+    {
+      sequelize: sequelizeInstance,
+      modelName: "Movie",
+      tableName: "movies",
+      timestamps: false,
+    }
+  );
+};
 
-// `centralNode.define` also returns the model
-console.log(Movie === centralNode.models.Movie); // true
-
-export default Movie;
+export { Movie, initModel };
