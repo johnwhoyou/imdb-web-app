@@ -142,6 +142,12 @@ const MoviesTable = () => {
                               }}
                             >Edit</p>
 
+                            <p className="text-[12px] border-b border-gray-200 hover:brightness-90 bg-white cursor-pointer"
+                              onClick={() => {
+                                router.push(`/view/${movie.id}`)
+                              }}
+                            >View</p>
+
                             <p className="text-[12px] hover:brightness-90 bg-white text-red-400 cursor-pointer" 
                               onClick={() => {
                                 setSelected(null)
