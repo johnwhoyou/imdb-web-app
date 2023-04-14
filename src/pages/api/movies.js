@@ -1,4 +1,4 @@
-import { Op } from "sequelize";
+import { Op, Sequelize, Transaction } from "sequelize";
 import { selectNode } from "../../lib/nodeSelector";
 import { Movie, initModel } from "../../lib/models/Movie";
 
@@ -40,37 +40,42 @@ export default async function handler(req, res) {
       initModel(selectedNode);
       
       var genres_arr = [];
-      var id = parseInt(req.query.movie_id, 10);
-
-      // Fetch genres options
+      
       Movie.findAll({
         attributes: ["genre"],
         group: ["genre"],
       })
-        .then((genres) => {
-          genres = genres.filter((val) => {
-            return val.genre != null;
-          });
-          genres_arr = genres;
-
-          // Fetches movie data, using movie_id
-          Movie.findByPk(id)
-            .then((movie) => {
-              if (movie === null)
-                res.status(500).json({ message: "Error movie not found." });
-              else {
-                res.status(201).json({ movie: movie, genres: genres_arr });
-              }
-            })
-            .catch((error) => {
-              res.status(500).json({ message: error.message });
-            });
+      .then((genres) => {
+        genres = genres.filter((val) => {
+          return val.genre != null
         })
-        .catch((err) => {
-          res.status(500).json({ message: "Error Fetching Genres" });
-        });
-    } else if (req.query.delete) {
+
+        genres_arr = genres;
+
+        Movie.findByPk(req.query.movie_id)
+        .then((movie) => {
+            if (movie === null)
+              res.status(500).json({ message: "Error movie not found." })
+            else {
+              res.status(201).json({ movie: movie, genres: genres_arr })
+            }
+          })
+          .catch(() => {
+            res.status(500).json({ message: "Error Fetching Movie Data" })
+          });
+      })
+      .catch(() => {
+        res.status(500).json({ message: "Error Fetching Genres" })
+      })
+    } 
+
+    // Delete Query
+    else if (req.query.delete) {
       if (req.query.movie_id) {
+
+        const selectedNode = await selectNode("allMovies")
+        initModel(selectedNode)
+
         const row = await Movie.findOne({
           where: {
             id: req.query.movie_id,
@@ -78,17 +83,39 @@ export default async function handler(req, res) {
         });
 
         if (row) {
+
+          const year = row.year
+
           Movie.destroy({
             where: {
               id: req.query.movie_id,
             },
           })
-            .then((result) => {
-              res.status(200).json(result);
+          .then(async () => {
+
+            const schema = year >= 1980 ? "from1980" : "before1980"
+            const newNode = await selectNode(schema)
+            initModel(newNode)
+
+            Movie.destroy({
+              where: {
+                id: req.query.movie_id,
+              },
             })
-            .catch((error) => {
-              res.status(500).json({ message: "Error deleting entry" });
-            });
+            .then(async () => {
+              const selectedNode = await selectNode("allMovies")
+              initModel(selectedNode)
+
+              res.status(200).json({message: "Successfully deleted entry"});
+            })
+            .catch(() => {
+              res.status(500).json({ message: `Error deleting entry in ${schema} database` });
+            })
+
+          })
+          .catch((error) => {
+            res.status(500).json({ message: "Error deleting entry" });
+          });
         } else {
           res.status(500).json({ message: "Movie Not Found" });
         }
@@ -141,45 +168,58 @@ export default async function handler(req, res) {
     try {
       // If no id is sent, create new entry
       if (!req.body.id) {
+
+        const selectedNode = await selectNode("allMovies")
+        initModel(selectedNode)
+
         // Insert new entry
-        Movie.max("id")
-          .then((maxID) => {
-            let id = maxID + 1;
+        Movie.create({
+          name: req.body.name,
+          year: req.body.year,
+          rank: req.body.rank,
+          genre: req.body.genre,
+          director: req.body.director,
+          actor1: req.body.actor1,
+          actor2: req.body.actor2,
+        })
+        .then(async (created) => {
+          const schema = req.body.year >= 1980 ? "from1980" : "before1980"
+          const newNode = await selectNode(schema)
+          initModel(newNode)
 
-            Movie.create({
-              id: id,
-              name: req.body.name,
-              year: req.body.year,
-              rank: req.body.rank,
-              genre: req.body.genre,
-              director: req.body.director,
-              actor1: req.body.actor1,
-              actor2: req.body.actor2,
-            })
-              .then((created) => {
-                // if(req.body.year >= 1980){
-                //   res.status(201).json(newMovie)
-                //   // Movie Create in node 2
-                // }
+          Movie.create({
+            id: created.id,
+            name: req.body.name,
+            year: req.body.year,
+            rank: req.body.rank,
+            genre: req.body.genre,
+            director: req.body.director,
+            actor1: req.body.actor1,
+            actor2: req.body.actor2,
+          })
+          .then(async () => {
 
-                // else{
-                //   res.status(201).json(newMovie)
-                //   // Create Movie for node 3
-                // }
+            const masterNode = await selectNode("allMovies")
+            initModel(masterNode)
 
-                res.status(201).json(created);
-              })
-              .catch((error) => {
-                res.status(500).json({ message: error.message });
-              });
+            res.status(201).json({message: "Successfully Added"})
           })
           .catch((error) => {
-            res.status(500).json({ message: error.message });
-          });
+            res.status(500).json({ message: "Error in adding to new node" });
+          })
+
+        })
+        .catch((error) => {
+          res.status(500).json({ message: error.message });
+        })
       }
 
       // If an id was sent, assume an entry is to be updated
       else {
+
+        const selectedNode = await selectNode("allMovies")
+        initModel(selectedNode)
+
         Movie.update(
           {
             name: req.body.name,
@@ -195,12 +235,42 @@ export default async function handler(req, res) {
             },
           }
         )
-          .then((updated) => {
+        .then(async (updated) => {
+
+          const schema = req.body.year >= 1980 ? "from1980" : "before1980"
+          const newNode = await selectNode(schema)
+          initModel(newNode)
+
+          Movie.update(
+            {
+              name: req.body.name,
+              year: req.body.year,
+              genre: req.body.genre,
+              director: req.body.director,
+              actor1: req.body.actor1,
+              actor2: req.body.actor2,
+            },
+            {
+              where: {
+                id: req.body.id
+              }
+            }
+          )
+          .then(async () => {
+            const masterNode = await selectNode("allMovies")
+            initModel(masterNode)
+
             res.status(201).json({ message: "Successfully updated" });
           })
-          .catch((error) => {
-            res.status(500).json({ message: error.message });
-          });
+          .catch(() => {
+            res.status(500).json({ message: `Failed to Update ${schema} database`})
+          })
+
+        })
+        .catch(() => {
+          res.status(500).json({ message: "Failed to update allMovies database" })
+        })
+
       }
     } catch (error) {
       console.error("Error creating movie:", error);

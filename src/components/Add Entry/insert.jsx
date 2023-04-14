@@ -53,8 +53,7 @@ export default function Add_Entry(){
 
         axios.post("/api/movies", data)
         .then((res) => {
-            console.log(res.data)
-
+            console.log(res.message)
             console.log("Entry Added")
             router.push("/")
         }).catch((err) => {
