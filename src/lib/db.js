@@ -1,51 +1,61 @@
 import { Sequelize } from "sequelize";
+import mysql2 from "mysql2";
 
 const allMoviesNode1 = new Sequelize("All_Movies", process.env.DB_USER, process.env.DB_PASS, {
     host: process.env.DB_HOST,
     port: 39048,
     dialect: "mysql",
+    dialectModule: mysql2,
 });
 const before1980Node1 = new Sequelize("Before_1980", process.env.DB_USER, process.env.DB_PASS, {
     host: process.env.DB_HOST,
     port: 39048,
     dialect: "mysql",
+    dialectModule: mysql2,
 });
 const from1980Node1 = new Sequelize("From_1980", process.env.DB_USER, process.env.DB_PASS, {
     host: process.env.DB_HOST,
     port: 39048,
     dialect: "mysql",
+    dialectModule: mysql2,
 });
 
 const allMoviesNode2 = new Sequelize("All_Movies", process.env.DB_USER, process.env.DB_PASS, {
     host: process.env.DB_HOST,
     port: 39049,
     dialect: "mysql",
+    dialectModule: mysql2,
 });
 const before1980Node2 = new Sequelize("Before_1980", process.env.DB_USER, process.env.DB_PASS, {
     host: process.env.DB_HOST,
     port: 39049,
     dialect: "mysql",
+    dialectModule: mysql2,
 });
 const from1980Node2 = new Sequelize("From_1980", process.env.DB_USER, process.env.DB_PASS, {
     host: process.env.DB_HOST,
     port: 39049,
     dialect: "mysql",
+    dialectModule: mysql2,
 });
 
 const allMoviesNode3 = new Sequelize("All_Movies", process.env.DB_USER, process.env.DB_PASS, {
     host: process.env.DB_HOST,
     port: 39050,
     dialect: "mysql",
+    dialectModule: mysql2,
 });
 const before1980Node3 = new Sequelize("Before_1980", process.env.DB_USER, process.env.DB_PASS, {
     host: process.env.DB_HOST,
     port: 39050,
     dialect: "mysql",
+    dialectModule: mysql2,
 });
 const from1980Node3 = new Sequelize("From_1980", process.env.DB_USER, process.env.DB_PASS, {
     host: process.env.DB_HOST,
     port: 39050,
     dialect: "mysql",
+    dialectModule: mysql2,
 });
 
 export {
