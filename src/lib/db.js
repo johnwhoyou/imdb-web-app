@@ -1,11 +1,61 @@
-const { Sequelize } = require("sequelize");
+import { Sequelize } from "sequelize";
 
-/*
-* To Test Locally:
-* Create .env.local file
-* add the line: NODE1="mysql://root:1234@localhost:8888/central_node"
-* Change the URL appropriately
-*/
-const centralNode = new Sequelize(process.env.NODE1);
+const allMoviesNode1 = new Sequelize("All_Movies", process.env.DB_USER, process.env.DB_PASS, {
+    host: process.env.DB_HOST,
+    port: 39048,
+    dialect: "mysql",
+});
+const before1980Node1 = new Sequelize("Before_1980", process.env.DB_USER, process.env.DB_PASS, {
+    host: process.env.DB_HOST,
+    port: 39048,
+    dialect: "mysql",
+});
+const from1980Node1 = new Sequelize("From_1980", process.env.DB_USER, process.env.DB_PASS, {
+    host: process.env.DB_HOST,
+    port: 39048,
+    dialect: "mysql",
+});
 
-export default centralNode;
+const allMoviesNode2 = new Sequelize("All_Movies", process.env.DB_USER, process.env.DB_PASS, {
+    host: process.env.DB_HOST,
+    port: 39049,
+    dialect: "mysql",
+});
+const before1980Node2 = new Sequelize("Before_1980", process.env.DB_USER, process.env.DB_PASS, {
+    host: process.env.DB_HOST,
+    port: 39049,
+    dialect: "mysql",
+});
+const from1980Node2 = new Sequelize("From_1980", process.env.DB_USER, process.env.DB_PASS, {
+    host: process.env.DB_HOST,
+    port: 39049,
+    dialect: "mysql",
+});
+
+const allMoviesNode3 = new Sequelize("All_Movies", process.env.DB_USER, process.env.DB_PASS, {
+    host: process.env.DB_HOST,
+    port: 39050,
+    dialect: "mysql",
+});
+const before1980Node3 = new Sequelize("Before_1980", process.env.DB_USER, process.env.DB_PASS, {
+    host: process.env.DB_HOST,
+    port: 39050,
+    dialect: "mysql",
+});
+const from1980Node3 = new Sequelize("From_1980", process.env.DB_USER, process.env.DB_PASS, {
+    host: process.env.DB_HOST,
+    port: 39050,
+    dialect: "mysql",
+});
+
+export {
+  allMoviesNode1,
+  before1980Node1,
+  from1980Node1,
+  allMoviesNode2,
+  before1980Node2,
+  from1980Node2,
+  allMoviesNode3,
+  before1980Node3,
+  from1980Node3,
+};
