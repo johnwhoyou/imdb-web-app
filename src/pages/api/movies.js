@@ -16,22 +16,31 @@ export default async function handler(req, res) {
     // Fetching options for genres
     if (req.query.options) {
       var genres_arr = [];
+      
+      const transaction_1 = await Movie.sequelize.transaction()
 
-      Movie.findAll({
-        attributes: ["genre"],
-        group: ["genre"],
-      })
-        .then((genres) => {
-          genres = genres.filter((val) => {
-            return val.genre != null;
-          });
-          genres_arr = genres;
-
-          res.status(201).json({ genres_arr });
+      try {
+        const genres = await Movie.findAll({
+          attributes: ["genre"],
+          group: ["genre"],
+          transaction: transaction_1
         })
-        .catch((err) => {
+
+        await transaction_1.commit()
+        .then(() => {
+          genres_arr = genres
+          genres_arr = genres_arr.filter((val) => {
+            return val.genre != null;
+          })
+
+          res.status(201).json({ genres_arr })
+        })
+      } catch (error) {
+        await transaction_1.rollback()
+        .then(() => {
           res.status(500).json({ message: "Error Fetching Genres" });
-        });
+        })
+      }
     }
 
     // Fetches movie data given a movie_id
@@ -41,32 +50,52 @@ export default async function handler(req, res) {
       
       var genres_arr = [];
       
-      Movie.findAll({
-        attributes: ["genre"],
-        group: ["genre"],
-      })
-      .then((genres) => {
-        genres = genres.filter((val) => {
-          return val.genre != null
+      const transaction_1 = await Movie.sequelize.transaction()
+
+      try {
+        
+        const find_genres = await Movie.findAll({
+          attributes: ["genre"],
+          group: ["genre"],
+          transaction: transaction_1
         })
 
-        genres_arr = genres;
-
-        Movie.findByPk(req.query.movie_id)
-        .then((movie) => {
-            if (movie === null)
-              res.status(500).json({ message: "Error movie not found." })
-            else {
-              res.status(201).json({ movie: movie, genres: genres_arr })
-            }
+        await transaction_1.commit()
+        .then(async () => {
+          genres_arr = find_genres
+          genres_arr = genres_arr.filter((val) => {
+            return val.genre != null
           })
-          .catch(() => {
-            res.status(500).json({ message: "Error Fetching Movie Data" })
-          });
-      })
-      .catch(() => {
-        res.status(500).json({ message: "Error Fetching Genres" })
-      })
+
+          const transaction_2 = await Movie.sequelize.transaction()
+
+          try {
+            
+            const get_movie = await Movie.findByPk(req.query.movie_id)
+
+            await transaction_2.commit()
+            .then(async () => {
+              if(get_movie === null)
+                res.status(500).json({ message: "Error movie not found." })
+
+              else
+                res.status(201).json({ movie: get_movie, genres: genres_arr })
+            })
+
+          } catch (error) {
+            await transaction_2.rollback()
+            .then(() => {
+              res.status(500).json({ message: "Error Fetching Movie Data" })
+            })
+          }
+        })
+
+      } catch (error) {
+        await transaction_1.rollback()
+        .then(() => {
+          res.status(500).json({ message: "Error Fetching Genres" })
+        })
+      }
     } 
 
     // Delete Query
