@@ -172,23 +172,12 @@ export default async function handler(req, res) {
         const selectedNode = await selectNode("allMovies")
         initModel(selectedNode)
 
-        // Insert new entry
-        Movie.create({
-          name: req.body.name,
-          year: req.body.year,
-          rank: req.body.rank,
-          genre: req.body.genre,
-          director: req.body.director,
-          actor1: req.body.actor1,
-          actor2: req.body.actor2,
-        })
-        .then(async (created) => {
-          const schema = req.body.year >= 1980 ? "from1980" : "before1980"
-          const newNode = await selectNode(schema)
-          initModel(newNode)
+        const transaction_1 = await Movie.sequelize.transaction()
 
-          Movie.create({
-            id: created.id,
+        try {
+          
+          // Insert Movie via Transaction to Master DB
+          const created_Movie_1 = await Movie.create({
             name: req.body.name,
             year: req.body.year,
             rank: req.body.rank,
@@ -196,22 +185,104 @@ export default async function handler(req, res) {
             director: req.body.director,
             actor1: req.body.actor1,
             actor2: req.body.actor2,
-          })
+          }, {transaction: transaction_1})
+
+          // Commit Transaction if no error occurs
+          await transaction_1.commit()
           .then(async () => {
 
-            const masterNode = await selectNode("allMovies")
-            initModel(masterNode)
+            const schema = req.body.year >= 1980 ? "from1980" : "before1980"
+            const newNode = await selectNode(schema)
+            initModel(newNode)
 
-            res.status(201).json({message: "Successfully Added"})
+            const transaction_2 = await Movie.sequelize.transaction()
+
+            try {
+
+              // Insert Movie via Transaction to Slave DB
+              const created_Movie_2 = await Movie.create({
+                id: created_Movie_1.id,
+                name: req.body.name,
+                year: req.body.year,
+                rank: req.body.rank,
+                genre: req.body.genre,
+                director: req.body.director,
+                actor1: req.body.actor1,
+                actor2: req.body.actor2,
+              }, {transaction: transaction_2})
+
+              // Commit Transaction if no error occurs
+              await transaction_2.commit()
+              .then(async () => {
+
+                const schema = req.body.year >= 1980 ? "from1980" : "before1980"
+                const newNode = await selectNode(schema)
+                initModel(newNode)
+
+                res.status(201).json({ message: "Successfully Added Entry" })
+
+              })
+
+            } catch (error) {
+              
+              // Cancel Commit if error found
+              await transaction_2.rollback().then(() => {
+                res.status(500).json({ message: "Error in adding to new node" });
+              })
+
+            }
+
           })
-          .catch((error) => {
+
+        } catch (error) {
+
+          // Cancel Commit if error found
+          await transaction_1.rollback().then(() => {
             res.status(500).json({ message: "Error in adding to new node" });
-          })
+          })        
 
-        })
-        .catch((error) => {
-          res.status(500).json({ message: error.message });
-        })
+        }
+
+        // Insert new entry
+        // Movie.create({
+        //   name: req.body.name,
+        //   year: req.body.year,
+        //   rank: req.body.rank,
+        //   genre: req.body.genre,
+        //   director: req.body.director,
+        //   actor1: req.body.actor1,
+        //   actor2: req.body.actor2,
+        // })
+        // .then(async (created) => {
+        //   const schema = req.body.year >= 1980 ? "from1980" : "before1980"
+        //   const newNode = await selectNode(schema)
+        //   initModel(newNode)
+
+        //   Movie.create({
+        //     id: created.id,
+        //     name: req.body.name,
+        //     year: req.body.year,
+        //     rank: req.body.rank,
+        //     genre: req.body.genre,
+        //     director: req.body.director,
+        //     actor1: req.body.actor1,
+        //     actor2: req.body.actor2,
+        //   })
+        //   .then(async () => {
+
+        //     const masterNode = await selectNode("allMovies")
+        //     initModel(masterNode)
+
+        //     res.status(201).json({message: "Successfully Added"})
+        //   })
+        //   .catch((error) => {
+        //     res.status(500).json({ message: "Error in adding to new node" });
+        //   })
+
+        // })
+        // .catch((error) => {
+        //   res.status(500).json({ message: error.message });
+        // })
       }
 
       // If an id was sent, assume an entry is to be updated
