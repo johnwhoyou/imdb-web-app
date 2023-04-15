@@ -1,5 +1,3 @@
-const { data } = require("autoprefixer");
-const { randomUUID } = require("crypto");
 const { Cluster } = require("puppeteer-cluster");
 
 // Case #1
