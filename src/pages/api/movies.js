@@ -157,7 +157,7 @@ export default async function handler(req, res) {
 
               } catch (error) {
                 
-                // Cancel transaction_2 if error was found
+                // Cancel delete on Slave DB if error was found
                 await transaction_2.rollback()
                 .then(() => {
                   res.status(500).json({ message: `Error deleting in ${schema} database` })
@@ -168,7 +168,7 @@ export default async function handler(req, res) {
 
           } catch (error) {
 
-            // Cancel transaction_1 if error was found
+            // Cancel delete on Master DB if error was found
             await transaction_1.rollback()
             .then(() => {
               res.status(500).json({ message: "Error deleting in allMovies database" })
@@ -202,23 +202,41 @@ export default async function handler(req, res) {
 
         const selectedNode = await selectNode("allMovies");
         initModel(selectedNode);
-        const movies = await Movie.findAndCountAll({
-          ...searchOptions,
-          limit,
-          offset,
-          order: [["id", "ASC"]],
-        });
 
-        const totalPages = Math.ceil(movies.count / limit);
+        const transaction_1 = await Movie.sequelize.transaction()
 
-        res.status(200).json({
-          data: movies.rows,
-          pagination: {
-            currentPage: page,
-            totalPages,
+        try {
+          const movies = await Movie.findAndCountAll({
+            ...searchOptions,
             limit,
-          },
-        });
+            offset,
+            order: [["id", "ASC"]],
+            transaction: transaction_1
+          })
+
+          await transaction_1.commit()
+          .then(() => {
+
+            const totalPages = Math.ceil(movies.count / limit)
+            res.status(200).json({
+              data: movies.rows,
+              pagination: {
+                currentPage: page,
+                totalPages,
+                limit,
+              },
+            })
+
+          })
+        } catch (error) {
+          
+          await transaction_1.rollback()
+          .then(() => {
+            res.status(500).json({ message: "Error fetching movies.", error })
+          })
+
+        }
+
       } catch (error) {
         console.error("Error fetching movies:", error);
         res.status(500).json({ message: "Error fetching movies.", error });
@@ -286,7 +304,7 @@ export default async function handler(req, res) {
 
             } catch (error) {
               
-              // Cancel Commit if error found
+              // Cancel insert on Slave DB if error found
               await transaction_2.rollback()
               .then(() => {
                 res.status(500).json({ message: "Error in adding to new node" });
@@ -297,7 +315,7 @@ export default async function handler(req, res) {
 
         } catch (error) {
 
-          // Cancel Commit if error found
+          // Cancel insert on Master DB if error found
           await transaction_1.rollback()
           .then(() => {
             res.status(500).json({ message: "Error in adding to new node" });
@@ -377,7 +395,7 @@ export default async function handler(req, res) {
 
             } catch (error) {
 
-              // Cancel transaction_2 if error occurs
+              // Cancel update on Slave DB if error occurs
               await transaction_2.rollback()
               .then(() => {
                 res.status(500).json({ message: `Failed to Update ${schema} database`})
@@ -388,7 +406,7 @@ export default async function handler(req, res) {
 
         } catch (error) {
 
-          // Cancel transaction_1 if error occurs
+          // Cancel update on Master DB if error occurs
           await transaction_1.rollback()
           .then(() => {
             res.status(500).json({ message: "Failed to update allMovies database" })
