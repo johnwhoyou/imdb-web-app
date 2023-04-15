@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "simulate": "node ./simulation/puppeteer.js"
   },
   "dependencies": {
     "@emotion/react": "^11.10.6",
@@ -23,6 +24,8 @@
     "eslint-config-next": "13.2.4",
     "mysql2": "^3.2.0",
     "next": "13.2.4",
+    "puppeteer": "^19.9.0",
+    "puppeteer-cluster": "^0.23.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "sequelize": "^6.30.0",

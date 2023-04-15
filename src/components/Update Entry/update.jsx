@@ -239,19 +239,24 @@ export default function Update_entry({ movie_id }){
                     name="genre"
                     id=""
                     className={`${montserrat.className} w-full mb-5 border border-black border-opacity-20 rounded-lg px-2 py-2 shadow-md text-[16px] hover:transition hover:border-opacity-80 duration-500 focus:outline-gray-500`}
-                    value={genre ? genre : ""}
+                    value={genre}
                     onChange={(e) => setGenre(e.target.value)}
                   >
-                    <option value="" hidden>
+                    <option value="" disabled>
                       Select a genre
                     </option>
-                    {genres.map((val, index) => {
-                      return (
-                        <option key={index} value={val.genre}>
-                          {val.genre}
-                        </option>
-                      );
-                    })}
+                    {
+                      genres.map((val, index) => {
+                        return (
+                          <option key={index} value={val.genre}>
+                            {val.genre}
+                          </option>
+                        );
+                      })
+                    }
+                    <option value={null}> 
+                      -- N/A --
+                    </option>
                   </select>
                 </section>
 
