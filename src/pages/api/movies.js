@@ -85,37 +85,68 @@ export default async function handler(req, res) {
         if (row) {
 
           const year = row.year
+          const transaction_1 = await Movie.sequelize.transaction()
 
-          Movie.destroy({
-            where: {
-              id: req.query.movie_id,
-            },
-          })
-          .then(async () => {
+          try {
 
-            const schema = year >= 1980 ? "from1980" : "before1980"
-            const newNode = await selectNode(schema)
-            initModel(newNode)
-
-            Movie.destroy({
+            // Delete movie via transaction in Master DB
+            const delete_Movie_1 = await Movie.destroy({
               where: {
                 id: req.query.movie_id,
               },
+              transaction: transaction_1
             })
+
+            // If no errors while deleting, commit transaction
+            await transaction_1.commit()
             .then(async () => {
-              const selectedNode = await selectNode("allMovies")
-              initModel(selectedNode)
 
-              res.status(200).json({message: "Successfully deleted entry"});
-            })
-            .catch(() => {
-              res.status(500).json({ message: `Error deleting entry in ${schema} database` });
+              const schema = year >= 1980 ? "from1980" : "before1980"
+              const newNode = await selectNode(schema)
+              initModel(newNode)
+
+              const transaction_2 = await Movie.sequelize.transaction()
+
+              try {
+                
+                // Delete movie via transaction in Slave DB
+                const delete_Movie_2 = await Movie.destroy({
+                  where: {
+                    id: req.query.movie_id,
+                  },
+                  transaction: transaction_2
+                })
+
+                // If no errors while deleting, commit transaction
+                await transaction_2.commit()
+                .then(async () => {
+                  const selectedNode = await selectNode("allMovies")
+                  initModel(selectedNode)
+
+                  res.status(200).json({message: "Successfully deleted entry"})
+                })
+
+              } catch (error) {
+                
+                // Cancel transaction_2 if error was found
+                await transaction_2.rollback()
+                .then(() => {
+                  res.status(500).json({ message: `Error deleting in ${schema} database` })
+                })
+
+              }
             })
 
-          })
-          .catch((error) => {
-            res.status(500).json({ message: "Error deleting entry" });
-          });
+          } catch (error) {
+
+            // Cancel transaction_1 if error was found
+            await transaction_1.rollback()
+            .then(() => {
+              res.status(500).json({ message: "Error deleting in allMovies database" })
+            })
+
+          }
+
         } else {
           res.status(500).json({ message: "Movie Not Found" });
         }
@@ -227,23 +258,23 @@ export default async function handler(req, res) {
             } catch (error) {
               
               // Cancel Commit if error found
-              await transaction_2.rollback().then(() => {
+              await transaction_2.rollback()
+              .then(() => {
                 res.status(500).json({ message: "Error in adding to new node" });
               })
 
             }
-
           })
 
         } catch (error) {
 
           // Cancel Commit if error found
-          await transaction_1.rollback().then(() => {
+          await transaction_1.rollback()
+          .then(() => {
             res.status(500).json({ message: "Error in adding to new node" });
           })        
 
         }
-
       }
 
       // If an ID was sent, assume an entry is to be updated
@@ -316,15 +347,24 @@ export default async function handler(req, res) {
               })
 
             } catch (error) {
-              res.status(500).json({ message: `Failed to Update ${schema} database`})
-            }
 
+              // Cancel transaction_2 if error occurs
+              await transaction_2.rollback()
+              .then(() => {
+                res.status(500).json({ message: `Failed to Update ${schema} database`})
+              })
+
+            }
           })
 
         } catch (error) {
-          res.status(500).json({ message: "Failed to update allMovies database" })
-        }
 
+          // Cancel transaction_1 if error occurs
+          await transaction_1.rollback()
+          .then(() => {
+            res.status(500).json({ message: "Failed to update allMovies database" })
+          })
+        }
       }
     } catch (error) {
       console.error("Error creating movie:", error);
