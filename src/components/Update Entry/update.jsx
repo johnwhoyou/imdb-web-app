@@ -41,6 +41,7 @@ export default function Update_entry({ movie_id }){
                     setGenres(res.data.genres)
                     // console.log(res.data)
                 }).catch((error) => {
+                    router.push("/search");
                     console.log(error.message)
                 })
         }
