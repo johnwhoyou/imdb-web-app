@@ -1,4 +1,3 @@
-const { data } = require("autoprefixer");
 const { Cluster } = require("puppeteer-cluster");
 
 const caseOneTest = async () => {
@@ -81,6 +80,8 @@ const caseOneTest = async () => {
   if (dataItemsString.every((item) => item === dataItemsString[0]))
     console.log("Results: All data items match.");
   else console.log("Results: Data item mismatch. Check transactions.");
+
+  console.log("\n\n\n");
 };
 
 module.exports = { caseOneTest };
