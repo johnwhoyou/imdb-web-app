@@ -166,7 +166,8 @@ export default async function handler(req, res) {
     }
   } else if (req.method === "POST") {
     try {
-      // If no id is sent, create new entry
+
+      // If no ID was sent, assume create new entry
       if (!req.body.id) {
 
         const selectedNode = await selectNode("allMovies")
@@ -243,76 +244,20 @@ export default async function handler(req, res) {
 
         }
 
-        // Insert new entry
-        // Movie.create({
-        //   name: req.body.name,
-        //   year: req.body.year,
-        //   rank: req.body.rank,
-        //   genre: req.body.genre,
-        //   director: req.body.director,
-        //   actor1: req.body.actor1,
-        //   actor2: req.body.actor2,
-        // })
-        // .then(async (created) => {
-        //   const schema = req.body.year >= 1980 ? "from1980" : "before1980"
-        //   const newNode = await selectNode(schema)
-        //   initModel(newNode)
-
-        //   Movie.create({
-        //     id: created.id,
-        //     name: req.body.name,
-        //     year: req.body.year,
-        //     rank: req.body.rank,
-        //     genre: req.body.genre,
-        //     director: req.body.director,
-        //     actor1: req.body.actor1,
-        //     actor2: req.body.actor2,
-        //   })
-        //   .then(async () => {
-
-        //     const masterNode = await selectNode("allMovies")
-        //     initModel(masterNode)
-
-        //     res.status(201).json({message: "Successfully Added"})
-        //   })
-        //   .catch((error) => {
-        //     res.status(500).json({ message: "Error in adding to new node" });
-        //   })
-
-        // })
-        // .catch((error) => {
-        //   res.status(500).json({ message: error.message });
-        // })
       }
 
-      // If an id was sent, assume an entry is to be updated
+      // If an ID was sent, assume an entry is to be updated
       else {
 
         const selectedNode = await selectNode("allMovies")
         initModel(selectedNode)
 
-        Movie.update(
-          {
-            name: req.body.name,
-            year: req.body.year,
-            genre: req.body.genre,
-            director: req.body.director,
-            actor1: req.body.actor1,
-            actor2: req.body.actor2,
-          },
-          {
-            where: {
-              id: req.body.id,
-            },
-          }
-        )
-        .then(async (updated) => {
+        const transaction_1 = await Movie.sequelize.transaction()
 
-          const schema = req.body.year >= 1980 ? "from1980" : "before1980"
-          const newNode = await selectNode(schema)
-          initModel(newNode)
-
-          Movie.update(
+        try {
+          
+          // Update Movie via Transaction in Master DB
+          const updated_Movie_1 = await Movie.update(
             {
               name: req.body.name,
               year: req.body.year,
@@ -323,24 +268,62 @@ export default async function handler(req, res) {
             },
             {
               where: {
-                id: req.body.id
-              }
+                id: req.body.id,
+              },
+              transaction: transaction_1
             }
           )
+
+          // If no errors, commit transaction
+          await transaction_1.commit()
           .then(async () => {
-            const masterNode = await selectNode("allMovies")
-            initModel(masterNode)
+            
+            const schema = req.body.year >= 1980 ? "from1980" : "before1980"
+            const newNode = await selectNode(schema)
+            initModel(newNode)
 
-            res.status(201).json({ message: "Successfully updated" });
-          })
-          .catch(() => {
-            res.status(500).json({ message: `Failed to Update ${schema} database`})
+            const transaction_2 = await Movie.sequelize.transaction()
+
+            try {
+
+              // Update Movie via Transactions in Slave DB
+              const updated_Movie_2 = await Movie.update(
+                {
+                  name: req.body.name,
+                  year: req.body.year,
+                  genre: req.body.genre,
+                  director: req.body.director,
+                  actor1: req.body.actor1,
+                  actor2: req.body.actor2,
+                },
+                {
+                  where: {
+                    id: req.body.id
+                  },
+                  transaction: transaction_2
+                }
+              )
+              
+              // If no errors, commit transaction
+              await transaction_2.commit()
+              .then(async () => {
+
+                const selectedNode = await selectNode("allMovies")
+                initModel(selectedNode)
+
+                res.status(201).json({ message: "Successfully updated" })
+
+              })
+
+            } catch (error) {
+              res.status(500).json({ message: `Failed to Update ${schema} database`})
+            }
+
           })
 
-        })
-        .catch(() => {
+        } catch (error) {
           res.status(500).json({ message: "Failed to update allMovies database" })
-        })
+        }
 
       }
     } catch (error) {
