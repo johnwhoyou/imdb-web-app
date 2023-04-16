@@ -1,3 +1,9 @@
 const { caseOneTest } = require("./CaseOneTest");
+const { caseTwoTest } = require("./CaseTwoTest");
 
-caseOneTest();
+const runTests = async () => {
+  await caseOneTest();
+  await caseTwoTest();
+};
+
+runTests();
