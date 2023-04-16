@@ -1,66 +1,25 @@
 const { Cluster } = require("puppeteer-cluster");
+const axios = require("axios");
 
 const caseOneTest = async () => {
   const cluster = await Cluster.launch({
     concurrency: Cluster.CONCURRENCY_CONTEXT,
-    maxConcurrency: 3,
-    puppeteerOptions: { headless: false },
+    maxConcurrency: 2,
+    puppeteerOptions: { headless: true },
   });
 
   const dataItems = [];
 
   await cluster.task(async ({ page, data: url }) => {
-    let movieData = {};
-
-    await page.goto(url);
-
-    let selector = "/html/body/div/div/div/div[2]/form/p";
-    await page.waitForSelector(`xpath${selector}`);
-    let [element] = await page.$x(selector);
-    let value = await page.evaluate((el) => el.textContent, element);
-    movieData.title = value;
-
-    selector = "/html/body/div/div/div/div[2]/form/div[1]/section/p";
-    await page.waitForSelector(`xpath${selector}`);
-    [element] = await page.$x(selector);
-    value = await page.evaluate((el) => el.textContent, element);
-    movieData.year = value;
-
-    selector = "/html/body/div/div/div/div[2]/form/div[2]/section[1]/p";
-    await page.waitForSelector(`xpath${selector}`);
-    [element] = await page.$x(selector);
-    value = await page.evaluate((el) => el.textContent, element);
-    movieData.genre = value;
-
-    selector = "/html/body/div/div/div/div[2]/form/div[2]/section[2]/p";
-    await page.waitForSelector(`xpath${selector}`);
-    [element] = await page.$x(selector);
-    value = await page.evaluate((el) => el.textContent, element);
-    movieData.director = value;
-
-    selector = "/html/body/div/div/div/div[2]/form/div[3]/section[1]/p";
-    await page.waitForSelector(`xpath${selector}`);
-    [element] = await page.$x(selector);
-    value = await page.evaluate((el) => el.textContent, element);
-    movieData.firstActor = value;
-
-    selector = "/html/body/div/div/div/div[2]/form/div[3]/section[2]/p";
-    await page.waitForSelector(`xpath${selector}`);
-    [element] = await page.$x(selector);
-    value = await page.evaluate((el) => el.textContent, element);
-    movieData.secondActor = value;
-
+    const movieData = await axios.get(url).then((response) => response.data.movie);
     dataItems.push(movieData);
   });
 
   cluster.queue(
-    "https://imdb-web-app.vercel.app/view/af959bef-d8e0-4c95-bf48-29caba63da56"
+    "https://imdb.johnjoyo.dev/api/movies?movie_id=0e9c3edf-7dc4-47af-accb-76a796e8d8b3"
   );
   cluster.queue(
-    "https://imdb-web-app.vercel.app/view/af959bef-d8e0-4c95-bf48-29caba63da56"
-  );
-  cluster.queue(
-    "https://imdb-web-app.vercel.app/view/af959bef-d8e0-4c95-bf48-29caba63da56"
+    "https://imdb.johnjoyo.dev/api/movies?movie_id=0e9c3edf-7dc4-47af-accb-76a796e8d8b3"
   );
 
   await cluster.idle();
@@ -70,11 +29,13 @@ const caseOneTest = async () => {
   console.log("            Case #1 Test Result            ");
   console.log("===========================================");
 
-  dataItems.map((item, index) => {
-    console.log(`Transaction #${index + 1} Data:`);
-    console.table(item);
-    console.log("\n");
-  });
+  await Promise.all(
+    dataItems.map(async (item, index) => {
+      console.log(`Transaction #${index + 1} Data:`);
+      console.table(item);
+      console.log("\n");
+    })
+  );
 
   const dataItemsString = dataItems.map((item) => JSON.stringify(item));
   if (dataItemsString.every((item) => item === dataItemsString[0]))
