@@ -42,9 +42,6 @@ const caseThreeTest = async () => {
     await yearInput.focus();
     await page.keyboard.type("2069");
 
-    // await new Promise((resolve) => setTimeout(resolve, 10000));
-    // await page.select("select", "Western");
-
     await page.waitForXPath(
       "/html/body/div/div/div/div[2]/form/div[2]/section[2]/input"
     );

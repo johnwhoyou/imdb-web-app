@@ -20,7 +20,7 @@ const caseTwoTest = async () => {
   let updateResult = "No write occured.";
   let selectedName = "No movie name selected";
 
-  await cluster.queue(
+  cluster.queue(
     "https://imdb.johnjoyo.dev/api/movies?movie_id=0e9c3edf-7dc4-47af-accb-76a796e8d8b3",
     async ({ data: url }) => {
       const movieData = await axios
@@ -30,7 +30,7 @@ const caseTwoTest = async () => {
     }
   );
 
-  await cluster.queue(
+  cluster.queue(
     "https://imdb.johnjoyo.dev/update/0e9c3edf-7dc4-47af-accb-76a796e8d8b3",
     async ({ page, data: url }) => {
       await page.goto(url);
@@ -54,9 +54,6 @@ const caseTwoTest = async () => {
       )[0];
       await yearInput.focus();
       await page.keyboard.type("2069");
-
-      // await new Promise((resolve) => setTimeout(resolve, 10000));
-      // await page.select("select", "Western");
 
       await page.waitForXPath(
         "/html/body/div/div/div/div[2]/form/div[2]/section[2]/input"
@@ -111,7 +108,7 @@ const caseTwoTest = async () => {
     }
   );
 
-  await cluster.queue(
+  cluster.queue(
     "https://imdb.johnjoyo.dev/api/movies?movie_id=0e9c3edf-7dc4-47af-accb-76a796e8d8b3",
     async ({ data: url }) => {
       const movieData = await axios
