@@ -11,7 +11,9 @@ const caseOneTest = async () => {
   const dataItems = [];
 
   await cluster.task(async ({ page, data: url }) => {
-    const movieData = await axios.get(url).then((response) => response.data.movie);
+    const movieData = await axios
+      .get(url)
+      .then((response) => response.data.movie);
     dataItems.push(movieData);
   });
 
@@ -31,6 +33,7 @@ const caseOneTest = async () => {
 
   await Promise.all(
     dataItems.map(async (item, index) => {
+      delete item.genre;
       console.log(`Transaction #${index + 1} Data:`);
       console.table(item);
       console.log("\n");
