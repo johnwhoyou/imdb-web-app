@@ -12,8 +12,6 @@ export default async function handler(req, res) {
   initModel(selectedNode);
 
   if (req.method === "GET") {
-    const selectedNode = await selectNode("allMovies");
-    initModel(selectedNode);
 
     // Fetching options for genres
     if (req.query.options) {
@@ -45,8 +43,6 @@ export default async function handler(req, res) {
 
     // Fetches movie data given a movie_id
     else if (req.query.movie_id && !req.query.delete) {
-      const selectedNode = await selectNode("allMovies");
-      initModel(selectedNode);
 
       var genres_arr = [];
 
@@ -92,8 +88,6 @@ export default async function handler(req, res) {
     // Delete Query
     else if (req.query.delete) {
       if (req.query.movie_id) {
-        const selectedNode = await selectNode("allMovies");
-        initModel(selectedNode);
 
         const row = await Movie.findOne({
           where: {
@@ -179,8 +173,8 @@ export default async function handler(req, res) {
               },
             }
           : {};
-        const selectedNode = await selectNode("allMovies");
-        initModel(selectedNode);
+        
+        
         const movies = await Movie.findAndCountAll({
           ...searchOptions,
           limit,
@@ -205,8 +199,6 @@ export default async function handler(req, res) {
     try {
       // If no ID was sent, assume create new entry
       if (!req.body.id) {
-        const selectedNode = await selectNode("allMovies");
-        initModel(selectedNode);
 
         const transaction_1 = await Movie.sequelize.transaction();
 
@@ -235,7 +227,7 @@ export default async function handler(req, res) {
 
             try {
               // Insert Movie via Transaction to Slave DB
-              const created_Movie_2 = await Movie.create(
+              await Movie.create(
                 {
                   id: created_Movie_1.id,
                   name: req.body.name,
@@ -277,14 +269,12 @@ export default async function handler(req, res) {
 
       // If an ID was sent, assume an entry is to be updated
       else {
-        const selectedNode = await selectNode("allMovies");
-        initModel(selectedNode);
 
         const transaction_1 = await Movie.sequelize.transaction();
 
         try {
           // Update Movie via Transaction in Master DB
-          const updated_Movie_1 = await Movie.update(
+          await Movie.update(
             {
               name: req.body.name,
               year: req.body.year,
@@ -311,7 +301,7 @@ export default async function handler(req, res) {
 
             try {
               // Update Movie via Transactions in Slave DB
-              const updated_Movie_2 = await Movie.update(
+              await Movie.update(
                 {
                   name: req.body.name,
                   year: req.body.year,
