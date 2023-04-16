@@ -1,62 +1,40 @@
 import { Sequelize } from "sequelize";
 import mysql2 from "mysql2";
+import databaseConfig from "./dbConfig";
 
-const allMoviesNode1 = new Sequelize("All_Movies", process.env.DB_USER, process.env.DB_PASS, {
-    host: process.env.DB_HOST,
-    port: 39048,
-    dialect: "mysql",
-    dialectModule: mysql2,
-});
-const before1980Node1 = new Sequelize("Before_1980", process.env.DB_USER, process.env.DB_PASS, {
-    host: process.env.DB_HOST,
-    port: 39048,
-    dialect: "mysql",
-    dialectModule: mysql2,
-});
-const from1980Node1 = new Sequelize("From_1980", process.env.DB_USER, process.env.DB_PASS, {
-    host: process.env.DB_HOST,
-    port: 39048,
-    dialect: "mysql",
-    dialectModule: mysql2,
-});
+const poolConfig = {
+  max: 5,
+  min: 0,
+  acquire: 30000,
+  idle: 10000,
+};
 
-const allMoviesNode2 = new Sequelize("All_Movies", process.env.DB_USER, process.env.DB_PASS, {
-    host: process.env.DB_HOST,
-    port: 39049,
-    dialect: "mysql",
-    dialectModule: mysql2,
-});
-const before1980Node2 = new Sequelize("Before_1980", process.env.DB_USER, process.env.DB_PASS, {
-    host: process.env.DB_HOST,
-    port: 39049,
-    dialect: "mysql",
-    dialectModule: mysql2,
-});
-const from1980Node2 = new Sequelize("From_1980", process.env.DB_USER, process.env.DB_PASS, {
-    host: process.env.DB_HOST,
-    port: 39049,
-    dialect: "mysql",
-    dialectModule: mysql2,
-});
+const configs = databaseConfig();
 
-const allMoviesNode3 = new Sequelize("All_Movies", process.env.DB_USER, process.env.DB_PASS, {
-    host: process.env.DB_HOST,
-    port: 39050,
-    dialect: "mysql",
-    dialectModule: mysql2,
-});
-const before1980Node3 = new Sequelize("Before_1980", process.env.DB_USER, process.env.DB_PASS, {
-    host: process.env.DB_HOST,
-    port: 39050,
-    dialect: "mysql",
-    dialectModule: mysql2,
-});
-const from1980Node3 = new Sequelize("From_1980", process.env.DB_USER, process.env.DB_PASS, {
-    host: process.env.DB_HOST,
-    port: 39050,
-    dialect: "mysql",
-    dialectModule: mysql2,
-});
+const createSequelizeInstance = (config) => {
+  return new Sequelize(config.database, config.username, config.password, {
+    host: config.host,
+    port: config.port,
+    dialect: config.dialect,
+    dialectModule: config.dialectModule,
+    pool: poolConfig,
+    dialectOptions: {
+        connectTimeout: 1000,
+    },
+  });
+};
+
+const allMoviesNode1 = createSequelizeInstance(configs.allMoviesNode1);
+const before1980Node1 = createSequelizeInstance(configs.before1980Node1);
+const from1980Node1 = createSequelizeInstance(configs.from1980Node1);
+
+const allMoviesNode2 = createSequelizeInstance(configs.allMoviesNode2);
+const before1980Node2 = createSequelizeInstance(configs.before1980Node2);
+const from1980Node2 = createSequelizeInstance(configs.from1980Node2);
+
+const allMoviesNode3 = createSequelizeInstance(configs.allMoviesNode3);
+const before1980Node3 = createSequelizeInstance(configs.before1980Node3);
+const from1980Node3 = createSequelizeInstance(configs.from1980Node3);
 
 export {
   allMoviesNode1,

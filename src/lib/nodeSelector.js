@@ -23,7 +23,7 @@ export async function selectNode(schema) {
     const node = nodes[currentNodeIndex][schema];
 
     try {
-      await node.authenticate();
+      await node.authenticate({ timeout: 2000 }); // Set a shorter timeout
       console.log("Node is healthy:", currentNodeIndex);
       return node;
     } catch (error) {
